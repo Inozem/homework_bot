@@ -1,15 +1,12 @@
-import os
 import time
 
 import requests
 import telegram
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
-PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+
+PRACTICUM_TOKEN = "AQAAAAAVr9FqAAYckWCB_5FF5UOTjbwIA0BOhQM"
+TELEGRAM_TOKEN = '5396406850:AAEgbULT3rcNM18oe7a1o5cjfIzLwqTiC7w'
 TELEGRAM_CHAT_ID = 499171407
 
 RETRY_TIME = 600
@@ -24,13 +21,16 @@ HOMEWORK_STATUSES = {
 }
 
 
+LAST_HOMEWORK_STATUS = ''
+
+
 def send_message(bot, message):
-    bot.send_message(TELEGRAM_CHAT_ID, message)
+    pass
 
 
 def get_api_answer(current_timestamp):
     """Делаем API запрос"""
-    timestamp = current_timestamp or int(time.time())
+    timestamp = 0
     params = {'from_date': timestamp}
     return requests.get(ENDPOINT, headers=HEADERS, params=params).json()
 
@@ -42,13 +42,6 @@ def check_response(response):
     else:
         print('Неверный формат данных API')
         return None
-
-
-def parse_status(homework):
-    homework_name = homework['homework_name']
-    homework_status = homework['status']
-    verdict = HOMEWORK_STATUSES[homework_status]
-    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
 
 def check_tokens():
@@ -63,29 +56,27 @@ def check_tokens():
 
 def main():
     """Основная логика работы бота."""
+
     if not check_tokens():
         return None
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    current_timestamp = int(time.time())
+    current_timestamp = 0
 
-    while True:
-        try:
-            api_answer = get_api_answer(current_timestamp)
-            response = check_response(api_answer)
+    api_answer = get_api_answer(current_timestamp)
 
-            if response != []:
-                status = parse_status(response[0])
-                send_message(bot, status)
 
-            current_timestamp = int(time.time())
-            time.sleep(RETRY_TIME)
+    try:
+        response = check_response(api_answer)
 
-        except Exception as error:
-            message = f'Сбой в работе программы: {error}'
-            send_message(bot, message)
-            time.sleep(RETRY_TIME)
-            main()
+        print(response)
+        print(api_answer['current_date'])
+        print(current_timestamp)
+
+    except Exception as error:
+        print(f'Сбой в работе программы: {error}')
+
+
 
 
 if __name__ == '__main__':
