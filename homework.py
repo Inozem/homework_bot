@@ -39,12 +39,13 @@ HOMEWORK_STATUSES = {
 
 
 class GetApiAnswerError(Exception):
-    """Класс ошибки ответа API"""
+    """Класс ошибки ответа API."""
+
     pass
 
 
 def send_message(bot, message):
-    """Отправка сообщения"""
+    """Отправка сообщения."""
     global LAST_MESSAGE
     try:
         if message != LAST_MESSAGE:
@@ -57,7 +58,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(current_timestamp):
-    """Делаем API запрос"""
+    """Делаем API запрос."""
     timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
@@ -70,7 +71,7 @@ def get_api_answer(current_timestamp):
 
 
 def check_response(response):
-    """Проверяем тип данных API"""
+    """Проверяем тип данных API."""
     if type(response) == dict:
         homeworks = response['homeworks']
         if type(homeworks) != list:
@@ -93,7 +94,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Проверяем статус домашней работы"""
+    """Проверяем статус домашней работы."""
     homework_name = homework['homework_name']
     homework_status = homework['status']
     try:
@@ -110,7 +111,7 @@ def parse_status(homework):
 
 
 def check_tokens():
-    """Проверка наличия токенов"""
+    """Проверка наличия токенов."""
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN:
         return True
     else:
