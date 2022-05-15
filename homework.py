@@ -57,7 +57,7 @@ def send_message(bot, message):
 
 def get_api_answer(current_timestamp):
     """Делаем API запрос."""
-    timestamp = 0
+    timestamp = current_timestamp or int(time.time())
     params = {'from_date': timestamp}
     logger.debug(f'Начало отправки запроса с параметрами "{params}"')
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
