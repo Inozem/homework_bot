@@ -57,7 +57,7 @@ def send_message(bot, message):
 
 def get_api_answer(current_timestamp):
     """Делаем API запрос."""
-    timestamp = current_timestamp or int(time.time())
+    timestamp = 0
     params = {'from_date': timestamp}
     logger.debug(f'Начало отправки запроса с параметрами "{params}"')
     response = requests.get(ENDPOINT, headers=HEADERS, params=params)
@@ -127,14 +127,22 @@ def main():
             api_answer = get_api_answer(current_timestamp)
             response = check_response(api_answer)
 
-            if response:
-                status = parse_status(response[0])
-                send_message(bot, status)
-            else:
+            if not response:
                 error_message = 'Статус домашней работы не обновлен ревьюером'
                 logger.debug(error_message)
                 raise NoneCriticalError(error_message)
-            current_timestamp = int(time.time())
+            else:
+                status = parse_status(response[0])
+                send_message(bot, status)
+
+            if 'current_date' not in api_answer:
+                error_message = ('В ответе на запрос отсутствует ключ '
+                                 '"current_date"')
+                logger.debug(error_message)
+                raise NoneCriticalError(error_message)
+            else:
+                current_timestamp = api_answer['current_date']
+
         except NoneCriticalError as error:
             message = f'Сбой в работе программы: {error}'
             logger.error(message)
