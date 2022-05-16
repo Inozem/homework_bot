@@ -73,11 +73,16 @@ def get_api_answer(current_timestamp):
 
 def check_response(response):
     """Проверяем тип данных API."""
+    if 'current_date' not in response:
+        error_message = ('В ответе на запрос отсутствует ключ '
+                         '"current_date"')
+        logger.error(error_message)
+
     if not isinstance(response, dict):
         error_message = 'Неверный тип данных API'
         raise TypeError(error_message)
     elif 'homeworks' not in response:
-        error_message = ('В запросе отутствует ключ "homeworks"')
+        error_message = ('В запросе отсутствует ключ "homeworks"')
         raise KeyError(error_message)
     elif not isinstance(response['homeworks'], list):
         error_message = ('Неверный тип данных домашних работ')
@@ -97,6 +102,11 @@ def parse_status(homework):
     else:
         homework_name = homework['homework_name']
         homework_status = homework['status']
+    if homework_status not in HOMEWORK_VERDICTS:
+        error_message = ('Отсутствует вердикт '
+                         'для такого статуса домашней работы')
+        raise KeyError(error_message)
+    else:
         verdict = HOMEWORK_VERDICTS[homework_status]
         return f'Изменился статус проверки работы "{homework_name}". {verdict}'
 
@@ -129,19 +139,14 @@ def main():
 
             if not response:
                 error_message = 'Статус домашней работы не обновлен ревьюером'
-                logger.debug(error_message)
                 raise NoneCriticalError(error_message)
             else:
                 status = parse_status(response[0])
                 send_message(bot, status)
-
-            if 'current_date' not in api_answer:
-                error_message = ('В ответе на запрос отсутствует ключ '
-                                 '"current_date"')
-                logger.debug(error_message)
-                raise NoneCriticalError(error_message)
-            else:
-                current_timestamp = api_answer['current_date']
+                current_timestamp = api_answer.get(
+                    'current_date',
+                    current_timestamp
+                )
 
         except NoneCriticalError as error:
             message = f'Сбой в работе программы: {error}'
