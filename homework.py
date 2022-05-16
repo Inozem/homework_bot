@@ -135,6 +135,10 @@ def main():
     while True:
         try:
             api_answer = get_api_answer(current_timestamp)
+            current_timestamp = api_answer.get(
+                'current_date',
+                current_timestamp
+            )
             response = check_response(api_answer)
 
             if not response:
@@ -143,10 +147,6 @@ def main():
             else:
                 status = parse_status(response[0])
                 send_message(bot, status)
-                current_timestamp = api_answer.get(
-                    'current_date',
-                    current_timestamp
-                )
 
         except NoneCriticalError as error:
             message = f'Сбой в работе программы: {error}'
